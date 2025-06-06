@@ -1,0 +1,111 @@
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class AddressBook {
+    private HashMap<String, String> contacts = new HashMap<>();
+    private final String fileName = "contacts.csv";
+
+    public AddressBook() {
+        load();
+    }
+
+    // Cargar los contactos desde el archivo CSV
+    public void load() {
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    contacts.put(parts[0], parts[1]);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error al cargar los contactos: " + e.getMessage());
+        }
+    }
+
+    // Guardar los contactos en el archivo CSV
+    public void save() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
+            for (Map.Entry<String, String> entry : contacts.entrySet()) {
+                bw.write(entry.getKey() + "," + entry.getValue());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error al guardar los contactos: " + e.getMessage());
+        }
+    }
+
+    // Listar los contactos
+    public void list() {
+        System.out.println("Contactos:");
+        for (Map.Entry<String, String> entry : contacts.entrySet()) {
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
+    }
+
+    // Crear un nuevo contacto
+    public void create(String phone, String name) {
+        contacts.put(phone, name);
+        save();
+    }
+
+    // Eliminar un contacto
+    public void delete(String phone) {
+        if (contacts.containsKey(phone)) {
+            contacts.remove(phone);
+            save();
+            System.out.println("Contacto eliminado.");
+        } else {
+            System.out.println("Contacto no encontrado.");
+        }
+    }
+
+    // Menú interactivo
+    public void menu() {
+        Scanner scanner = new Scanner(System.in);
+        int option;
+        do {
+            System.out.println("\nMenú:");
+            System.out.println("1. Listar contactos");
+            System.out.println("2. Agregar contacto");
+            System.out.println("3. Eliminar contacto");
+            System.out.println("4. Salir");
+            System.out.print("Selecciona una opción: ");
+            option = scanner.nextInt();
+            scanner.nextLine(); // Consumir la nueva línea
+
+            switch (option) {
+                case 1:
+                    list();
+                    break;
+                case 2:
+                    System.out.print("Ingrese el número: ");
+                    String phone = scanner.nextLine();
+                    System.out.print("Ingrese el nombre: ");
+                    String name = scanner.nextLine();
+                    create(phone, name);
+                    break;
+                case 3:
+                    System.out.print("Ingrese el número a eliminar: ");
+                    String delPhone = scanner.nextLine();
+                    delete(delPhone);
+                    break;
+                case 4:
+                    System.out.println("Saliendo...");
+                    break;
+                default:
+                    System.out.println("Opción inválida.");
+            }
+        } while (option != 4);
+        scanner.close();
+    }
+
+    public static void main(String[] args) {
+        AddressBook addressBook = new AddressBook();
+        addressBook.menu();
+    }
+}
+
